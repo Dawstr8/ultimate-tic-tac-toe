@@ -16,11 +16,26 @@ export default function Board() {
         [0, 0, 0, 0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0, 0, 0, 0]]);
 
+    const [nextMoves, setNextMoves] = useState<number[]>([0, 2, 5]);
+    const [turn, setTurn] = useState<number>(1);
+
+    function whatColor(id: number): string {
+        if (nextMoves.includes(id)) {
+            if (turn === 1) {
+                return 'red';
+            } else {
+                return 'blue';
+            }
+        } else {
+            return '';
+        }
+    }
+
     return (
         <div className='board'>
-            {board.map((smallBoard) => {
+            {board.map((smallBoard, id) => {
                 return (
-                    <SmallBoard smallBoard={smallBoard} />
+                    <SmallBoard smallBoard={smallBoard} color={whatColor(id)}/>
                 )
             })}
         </div>

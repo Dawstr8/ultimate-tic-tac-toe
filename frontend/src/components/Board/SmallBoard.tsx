@@ -2,12 +2,13 @@ import './Board.css'
 
 interface SmallBoard {
     smallBoard: number[];
+    color: string;
 }
 
-export default function SmallBoard({ smallBoard } : SmallBoard) {
+export default function SmallBoard({ smallBoard, color } : SmallBoard) {
 
     return (
-        <div className='small-board'>
+        <div className={'small-board ' + color}>
             {smallBoard.map((elem) => {
                 return(
                     <div className='field'>

@@ -8,6 +8,14 @@
     height: 12.9vw;
     width: 12.9vw;
     float: left;
+    border: 0.15vw black solid;
+}
+
+.red {
+    border: 0.15vw red solid;
+}
+
+.blue {
     border: 0.15vw blue solid;
 }
 
