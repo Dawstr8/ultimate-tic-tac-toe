@@ -1,0 +1,30 @@
+.board {
+    display: inline-block;
+    height: 39.6vw;
+    width: 39.6vw;
+}
+
+.small-board {
+    height: 12.9vw;
+    width: 12.9vw;
+    float: left;
+    border: 0.15vw blue solid;
+}
+
+.field {
+    height: 4vw;
+    width: 4vw;
+    border: 0.15vw black solid;
+    font-size: 3vw;
+    text-align: center;
+    line-height: 4vw;
+    float: left;
+}
+
+.field-x {
+    color: red;
+}
+
+.field-o {
+    color: blue;
+}
