@@ -3,15 +3,17 @@ import './Board.css'
 interface SmallBoard {
     smallBoard: number[];
     color: string;
+    bb: number;
+    makeMove(bb: number, sb: number): void;
 }
 
-export default function SmallBoard({ smallBoard, color } : SmallBoard) {
+export default function SmallBoard({ bb, smallBoard, makeMove, color } : SmallBoard) {
 
     return (
         <div className={'small-board ' + color}>
-            {smallBoard.map((elem) => {
+            {smallBoard.map((elem, sb) => {
                 return(
-                    <div className='field'>
+                    <div onClick={() => makeMove(bb, sb)} className='field'>
                         {elem === 0 ?
                             <div className='field-empty'></div>
                             :

@@ -49,14 +49,12 @@ module.exports = class UltimateTicTacToe {
     }
 
     makeMove(bb, sb) {
-        let nbb = parseInt(bb)
-        let nsb = parseInt(sb)
 
-        if (this.winner === 0 && this.bigBoard[bb] === 0 && this.nextMoves.includes(nbb) && this.board[nbb][nsb] === 0) {
-            this.board[nbb][nsb] = this.turn;
-            this.bigBoard[nbb] = this.checkWinner(this.board[nbb])
+        if (this.winner === 0 && this.bigBoard[bb] === 0 && this.nextMoves.includes(bb) && this.board[bb][sb] === 0) {
+            this.board[bb][sb] = this.turn;
+            this.bigBoard[bb] = this.checkWinner(this.board[bb])
             this.winner = this.checkWinner(this.bigBoard)
-            this.lastMove = [nbb, nsb]
+            this.lastMove = [bb, sb]
             this.nextMoves = this.calculateNextMoves()
             this.turn *= -1;
         }

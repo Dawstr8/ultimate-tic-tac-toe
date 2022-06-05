@@ -1,3 +1,4 @@
+import axios from 'axios';
 import { useState } from 'react';
 import './Board.css'
 
@@ -6,17 +7,19 @@ import SmallBoard from './SmallBoard';
 export default function Board() {
 
     const [board, setBoard] = useState<number[][]>(
-       [[1, 0, 0, 0, 0, 0, 0, 0, 0],
+       [[0, 0, 0, 0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 2, 0, 0],
         [0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 1, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0, 0, 0, 0]]);
 
-    const [nextMoves, setNextMoves] = useState<number[]>([0, 2, 5]);
+    const [bigBoard, setBigBoard] = useState<number[]>([0, 0, 0, 0, 0, 0, 0, 0, 0])
+
+    const [nextMoves, setNextMoves] = useState<number[]>([]);
     const [turn, setTurn] = useState<number>(1);
 
     function whatColor(id: number): string {
@@ -31,13 +34,36 @@ export default function Board() {
         }
     }
 
+    function startGame(): void {
+        axios.get('http://localhost:8080/startGame')
+        .then((response) => {
+            setBoard(response.data.board)
+            setBigBoard(response.data.bigBoard)
+            setNextMoves(response.data.nextMoves)
+            setTurn(response.data.turn)
+            console.log(response.data);
+        });
+    }
+
+    function makeMove(bb: number, sb: number): void {
+        axios.get('http://localhost:8080/makeMove', {params: { bb: String(bb), sb: String(sb) }})
+        .then((response) => {
+            setBoard(response.data.board)
+            setBigBoard(response.data.bigBoard)
+            setNextMoves(response.data.nextMoves)
+            setTurn(response.data.turn)
+            console.log(response.data);
+        });
+    }
+
     return (
         <div className='board'>
-            {board.map((smallBoard, id) => {
+            {board.map((smallBoard, bb) => {
                 return (
-                    <SmallBoard smallBoard={smallBoard} color={whatColor(id)}/>
+                    <SmallBoard bb={bb} smallBoard={smallBoard} makeMove={makeMove} color={whatColor(bb)}/>
                 )
             })}
+            <button onClick={() => startGame()}>Start game</button>
         </div>
     );
 }

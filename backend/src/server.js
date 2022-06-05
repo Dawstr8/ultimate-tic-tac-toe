@@ -1,6 +1,9 @@
 const express = require('express');
+var cors = require('cors')
 const app = express();
 const port = 8080;
+
+app.use(cors())
 
 var UltimateTicTacToe = require('./uttt.js')
 
@@ -24,7 +27,7 @@ app.get('/startGame', (req, res) => {
 
 app.get('/makeMove', (req, res) => {
 
-  const { board, bigBoard, winner } = game.makeMove(req.query.bb, req.query.sb)
+  game.makeMove(parseInt(req.query.bb), parseInt(req.query.sb))
 
   res.send(
     {
@@ -34,8 +37,7 @@ app.get('/makeMove', (req, res) => {
       lastMove: game.lastMove,
       nextMoves: game.nextMoves,
       turn: game.turn
-    }
-    );
+    });
 })
 
 app.listen(port, () => {
