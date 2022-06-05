@@ -1,20 +1,26 @@
-class UltimateTicTacToe {
-    constructor() {
-        this.bigBoard = [0, 0, 0, 0, 0, 0, 0, 0, 0]
-        this.board = [
-        [0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0, 0]];
-        this.nextMoves = [0, 1, 2, 3, 4, 5, 6, 7, 8];
-        this.lastMove = null;
-        this.turn = Math.pow(-1, [Math.floor(Math.random() * 2)]);
-        this.winner = 0;
+module.exports = class UltimateTicTacToe {
+    constructor(
+            bigBoard = [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            board=[
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0]],
+            nextMoves = [0, 1, 2, 3, 4, 5, 6, 7, 8],
+            lastMove = null,
+            turn = Math.pow(-1, [Math.floor(Math.random() * 2)]),
+            winner = 0) {
+        this.bigBoard = bigBoard;
+        this.board = board;
+        this.nextMoves = nextMoves;
+        this.lastMove = lastMove;
+        this.turn = turn;
+        this.winner = winner;
     }
 
     checkWinner(board) {
@@ -28,10 +34,23 @@ class UltimateTicTacToe {
     }
 
     makeMove(bb, sb) {
-        if (this.winner === 0 && nextMoves.includes(bb) && this.board[bb][sb] === 0) {
-            this.board[bb][sb] = turn;
-            this.bigBoard[bb] = checkWinner(board[bb])
-            this.winner = checkWinner(bigBoard)
+        let nbb = parseInt(bb)
+        let nsb = parseInt(sb)
+
+        if (this.winner === 0 && this.bigBoard[bb] === 0 && this.nextMoves.includes(nbb) && this.board[nbb][nsb] === 0) {
+            this.board[nbb][nsb] = this.turn;
+            this.bigBoard[nbb] = this.checkWinner(this.board[nbb])
+            this.winner = this.checkWinner(this.bigBoard)
+            this.turn *= -1;
+        }
+
+        return {
+            winner: this.winner,
+            board: this.board,
+            bigBoard: this.bigBoard,
+            lastMove: this.lastMove,
+            nextMoves: this.nextMoves,
+            turn: this.turn
         }
     }
 }
