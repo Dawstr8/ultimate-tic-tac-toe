@@ -23,6 +23,21 @@ module.exports = class UltimateTicTacToe {
         this.winner = winner;
     }
 
+    calculateNextMoves() {
+        let nextMoves = []
+        if (this.bigBoard[this.lastMove[1]] === 0) {
+            nextMoves.push(this.lastMove[1])
+        } else {
+            for (let i = 0; i < 9; i += 1) {
+                if (this.bigBoard[i] === 0) {
+                    nextMoves.push(i)
+                }
+            }
+        }
+
+        return nextMoves
+    }
+
     checkWinner(board) {
         const winningPositions = [[0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 4, 8], [2, 4, 6]]
         for (const winningPosition in winningPositions) {
@@ -41,6 +56,8 @@ module.exports = class UltimateTicTacToe {
             this.board[nbb][nsb] = this.turn;
             this.bigBoard[nbb] = this.checkWinner(this.board[nbb])
             this.winner = this.checkWinner(this.bigBoard)
+            this.lastMove = [nbb, nsb]
+            this.nextMoves = this.calculateNextMoves()
             this.turn *= -1;
         }
 
