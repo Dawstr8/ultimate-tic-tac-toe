@@ -54,7 +54,17 @@ export default function Board() {
             setBigBoard(response.data.bigBoard)
             setNextMoves(response.data.nextMoves)
             setTurn(response.data.turn)
+            setWinner(response.data.winner)
         });
+    }
+
+    function randomMove(): void {
+        let bb = nextMoves[Math.floor(Math.random()*nextMoves.length)]
+        let sb = Math.floor(Math.random()*9)
+        while (board[bb][sb] !== 0) {
+            sb = Math.floor(Math.random()*9)
+        }
+        makeMove(bb, sb)
     }
 
     return (
@@ -80,6 +90,7 @@ export default function Board() {
             {winner === -1 && <div>The winner is O</div>}
             {winner === 2 && <div>Draw</div>}
             <button onClick={() => startGame()}>Start game</button>
+            <button onClick={() => randomMove()}>Random Move</button>
         </div>
     );
 }
