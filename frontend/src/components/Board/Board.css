@@ -36,3 +36,9 @@
 .field-o {
     color: blue;
 }
+
+.big-field {
+    font-size: 9vw;
+    text-align: center;
+    line-height: 12.9vw;
+}

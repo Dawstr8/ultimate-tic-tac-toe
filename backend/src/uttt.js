@@ -36,7 +36,7 @@ module.exports = class UltimateTicTacToe {
                 }
             }
         }
-        return nextMoves
+        return nextMoves;
     }
 
     checkWinner(board) {
@@ -57,9 +57,9 @@ module.exports = class UltimateTicTacToe {
         }
 
         //draw
-        console.log("draw on")
-        console.log(board)
-        return 2;  
+        console.log("draw on");
+        console.log(board);
+        return 2;
     }
 
     makeMove(bb, sb) {

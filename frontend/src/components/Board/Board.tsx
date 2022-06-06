@@ -21,6 +21,7 @@ export default function Board() {
 
     const [nextMoves, setNextMoves] = useState<number[]>([]);
     const [turn, setTurn] = useState<number>(1);
+    const [winner, setWinner] = useState<number>(0)
 
     function whatColor(id: number): string {
         if (nextMoves.includes(id)) {
@@ -41,6 +42,7 @@ export default function Board() {
             setBigBoard(response.data.bigBoard)
             setNextMoves(response.data.nextMoves)
             setTurn(response.data.turn)
+            setWinner(response.data.winner)
             console.log(response.data);
         });
     }
@@ -52,17 +54,31 @@ export default function Board() {
             setBigBoard(response.data.bigBoard)
             setNextMoves(response.data.nextMoves)
             setTurn(response.data.turn)
-            console.log(response.data);
         });
     }
 
     return (
         <div className='board'>
+            <div>
             {board.map((smallBoard, bb) => {
-                return (
-                    <SmallBoard bb={bb} smallBoard={smallBoard} makeMove={makeMove} color={whatColor(bb)}/>
-                )
+                if (bigBoard[bb] === 0 || bigBoard[bb] === 2) {
+                    return (
+                        <SmallBoard bb={bb} smallBoard={smallBoard} makeMove={makeMove} color={whatColor(bb)}/>
+                    )
+                } else if (bigBoard[bb] === 1) {
+                    return (
+                        <div className='small-board big-field field-x'>X</div>
+                    )
+                } else {
+                    return (
+                        <div className='small-board big-field field-o'>O</div>
+                    )
+                }
             })}
+            </div>
+            {winner === 1 && <div>The winner is X</div>}
+            {winner === -1 && <div>The winner is O</div>}
+            {winner === 2 && <div>Draw</div>}
             <button onClick={() => startGame()}>Start game</button>
         </div>
     );
