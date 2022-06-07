@@ -1,13 +1,16 @@
 const express = require('express');
-var cors = require('cors')
 const app = express();
-const port = 8080;
-
-app.use(cors())
+const http = require('http');
+const server = http.createServer(app);
+const { Server } = require("socket.io");
+const cors = require('cors')
+app.use(cors());
+const io = new Server(server);
 
 var UltimateTicTacToe = require('./uttt.js')
 
 let game = null;
+const port = 8080;
 
 app.get('/', (req, res) => {
   res.send('Hello World!')
@@ -40,6 +43,14 @@ app.get('/makeMove', (req, res) => {
     });
 })
 
-app.listen(port, () => {
+io.on('connection', (socket) => {
+  console.log('a user connected')
+
+  socket.on('disconnect', () => {
+    console.log('user disconnected');
+  });
+})
+
+server.listen(port, () => {
   console.log(`Example app listening on port ${port}`)
 })
