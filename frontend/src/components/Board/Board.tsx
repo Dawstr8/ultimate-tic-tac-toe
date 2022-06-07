@@ -4,7 +4,12 @@ import './Board.css'
 
 import SmallBoard from './SmallBoard';
 
-export default function Board() {
+interface Board {
+    socket: any;
+}
+
+
+export default function Board({ socket }: Board) {
 
     const [board, setBoard] = useState<number[][]>(
        [[0, 0, 0, 0, 0, 0, 0, 0, 0],

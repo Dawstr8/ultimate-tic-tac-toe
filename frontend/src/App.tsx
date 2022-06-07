@@ -7,17 +7,22 @@ import LobbyList from './components/LobbyList/LobbyList';
 function App() {
 
   const [socket, setSocket] = useState<any>(null)
+  const [room, setRoom] = useState<null | string>(null)
 
   useEffect(() => {
     const newSocket = io(`http://localhost:8080`, { transports: ['websocket'] });
+
     setSocket(newSocket);
     return () => { newSocket.disconnect() };
   }, [setSocket]);
 
   return (
     <div className="App">
-      <LobbyList/>
-      <Board/>
+      {room === null?
+        <LobbyList setRoom={setRoom} socket={socket}/>
+        :
+        <Board socket={socket}/>
+      }      
     </div>
   );
 }

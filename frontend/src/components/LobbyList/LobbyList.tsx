@@ -1,24 +1,58 @@
-import { useState } from 'react';
+import axios from 'axios';
+import { useEffect, useState } from 'react';
 import ILobbyItem from '../../types/ILobbyItem';
 
-export default function LobbyList() {
+interface LobbyList {
+    socket: any;
+    setRoom: (value: null | string | ((prevState: null | string) => null | string)) => void;
+}
 
-    const [lobbyList, setLobbyList] = useState<Array<ILobbyItem>>([{id: "213423fewdf", user1: "fsdfsdfdsf", user2: "fesfsef"}])
+export default function LobbyList({ socket, setRoom } : LobbyList) {
 
-    function joinGame(id: string): void {
-        // join the game
+    const [lobbyList, setLobbyList] = useState<Array<ILobbyItem>>([])
+
+    function joinRoom(id: string): void {
+        // join the room
     }
+
+    function createRoom(): void {
+        if (socket !== null) {
+            socket.emit("create room", (response : string) => {
+                setRoom(response);
+            });
+        }
+    }
+
+    useEffect(() => {
+        function getRoomsList(): void {
+            axios.get('http://localhost:8080/getRoomsList')
+            .then((response) => {
+                setLobbyList(response.data)
+            });
+        }
+        getRoomsList();
+    }, []);
+
+    useEffect(() => {
+        if (socket !== null) {
+            socket.on("room list update", (...args: any) => {
+                setLobbyList(args[0]);
+            });
+        }
+    }, [socket, setLobbyList]);
+ 
 
     return (
         <div>
             {lobbyList.map((elem) => {
                 return (
                 <div>
-                    {elem.id} {elem.user1} {elem.user2}
-                    <button onClick={() => joinGame(elem.id)}>Join game</button>
+                    {elem.id} {elem.player1} {elem.player2}
+                    <button onClick={() => joinRoom(elem.id)}>Join room</button>
                 </div>
                 )
             })}
+            <button onClick={() => createRoom()}>Create room</button>
         </div>
     );
 }

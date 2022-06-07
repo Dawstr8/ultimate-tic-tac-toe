@@ -1,5 +1,5 @@
 export default interface ILobbyItem {
     id: string;
-    user1: string;
-    user2: string;
+    player1: string;
+    player2: string;
 }
