@@ -12,7 +12,11 @@ export default function LobbyList({ socket, setRoom } : LobbyList) {
     const [lobbyList, setLobbyList] = useState<Array<ILobbyItem>>([])
 
     function joinRoom(id: string): void {
-        // join the room
+        if (socket !== null) {
+            socket.emit("join room", id, (response : string) => {
+                setRoom(response);
+            });
+        }
     }
 
     function createRoom(): void {

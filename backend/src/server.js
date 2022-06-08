@@ -17,20 +17,6 @@ const port = 8080;
 const rooms = {}
 const users = {}
 
-const getRoomsList = () => {
-  var roomsList = [];
-  for (var key in rooms) {
-    if (rooms.hasOwnProperty(key)) {
-      roomsList.push({
-        id: key,
-        player1: rooms[key].players[0],
-        player2: rooms[key].players[1]
-      });
-    }
-  }
-  return roomsList;
-}
-
 app.get('/', (req, res) => {
   res.send('Hello World!')
 })
@@ -78,7 +64,7 @@ io.on('connection', (socket) => {
       const roomId = crypto.randomUUID()
       users[socket.id].roomId = roomId
       rooms[roomId] = {
-        players: [socket.id, null],
+        players: [socket.id],
         game: new UltimateTicTacToe()
       }
       
@@ -87,10 +73,59 @@ io.on('connection', (socket) => {
     }
   });
 
+  socket.on("join room", ( roomId, callback ) => {
+    if (users[socket.id].roomId === null && rooms[roomId].players.length < 2) {
+      users[socket.id].roomId = roomId
+      rooms[roomId].players.push(socket.id)
+
+      io.emit("room list update", getRoomsList());
+      callback(roomId)
+    }
+  });
+
+  socket.on("leave room", () => {
+    const result = leaveRoom(socket.id)
+    if (result) {
+      io.emit("room list update", getRoomsList());
+    }
+  });
+
   socket.on('disconnect', () => {
+    const result = leaveRoom(socket.id)
+    if (result) {
+      io.emit("room list update", getRoomsList());
+    }
     console.log('user disconnected');
   });
 })
+
+const getRoomsList = () => {
+  var roomsList = [];
+  for (var key in rooms) {
+    if (rooms.hasOwnProperty(key)) {
+      roomsList.push({
+        id: key,
+        player1: rooms[key].players[0],
+        player2: rooms[key].players[1]
+      });
+    }
+  }
+  return roomsList;
+}
+
+const leaveRoom = ( playerId ) => {
+  const roomId = users[playerId].roomId
+  if (roomId !== null) {
+    users[playerId].roomId = null;
+    if (rooms[roomId].players.length === 1) {
+      delete rooms[roomId];
+    } else if (rooms[roomId].players.length === 2) {
+      rooms[roomId].players = rooms[roomId].players.filter((id) => id !== playerId);
+    }
+    return true;
+  }
+  return false;
+}
 
 server.listen(port, () => {
   console.log(`Example app listening on port ${port}`)

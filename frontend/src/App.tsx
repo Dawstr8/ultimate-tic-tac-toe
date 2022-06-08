@@ -21,7 +21,7 @@ function App() {
       {room === null?
         <LobbyList setRoom={setRoom} socket={socket}/>
         :
-        <Board socket={socket}/>
+        <Board setRoom={setRoom} socket={socket}/>
       }      
     </div>
   );

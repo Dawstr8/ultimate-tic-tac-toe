@@ -6,10 +6,11 @@ import SmallBoard from './SmallBoard';
 
 interface Board {
     socket: any;
+    setRoom: (value: null | string | ((prevState: null | string) => null | string)) => void;
 }
 
 
-export default function Board({ socket }: Board) {
+export default function Board({ socket, setRoom }: Board) {
 
     const [board, setBoard] = useState<number[][]>(
        [[0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -72,6 +73,13 @@ export default function Board({ socket }: Board) {
         makeMove(bb, sb)
     }
 
+    function leaveRoom(): void {
+        if (socket !== null) {
+            socket.emit("leave room");
+            setRoom(null)
+        }
+    }
+
     return (
         <div className='board'>
             <div>
@@ -96,6 +104,8 @@ export default function Board({ socket }: Board) {
             {winner === 2 && <div>Draw</div>}
             <button onClick={() => startGame()}>Start game</button>
             <button onClick={() => randomMove()}>Random Move</button>
+            <button onClick={() => leaveRoom()}>Leave room</button>
+            
         </div>
     );
 }
