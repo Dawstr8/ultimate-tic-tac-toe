@@ -65,11 +65,30 @@ io.on('connection', (socket) => {
       users[socket.id].roomId = roomId
       rooms[roomId] = {
         players: [socket.id],
-        game: new UltimateTicTacToe()
+        game: null
       }
       
       io.emit("room list update", getRoomsList());
       callback(roomId)
+    }
+  });
+
+  socket.on("start game", ( roomId ) => {
+    if (roomId in rooms) {
+      rooms[roomId].game = new UltimateTicTacToe();
+      io.to(rooms[roomId].players[0]).to(rooms[roomId].players[1]).emit('game state changed', rooms[roomId].game)
+    }
+  });
+
+  socket.on("make move", ( roomId, bb, sb ) => {
+    if (roomId in rooms) {
+      let result;
+      if ((rooms[roomId].game.turn === -1 && socket.id === rooms[roomId].players[0]) || (rooms[roomId].game.turn === 1 && socket.id === rooms[roomId].players[1])) {
+        result = rooms[roomId].game.makeMove(bb, sb);
+      }
+      if (result) {
+        io.to(rooms[roomId].players[0]).to(rooms[roomId].players[1]).emit('game state changed', rooms[roomId].game)
+      }
     }
   });
 

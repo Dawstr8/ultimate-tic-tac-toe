@@ -63,7 +63,6 @@ module.exports = class UltimateTicTacToe {
     }
 
     makeMove(bb, sb) {
-
         if (this.winner === 0 && this.bigBoard[bb] === 0 && this.nextMoves.includes(bb) && this.board[bb][sb] === 0) {
             this.board[bb][sb] = this.turn;
             this.bigBoard[bb] = this.checkWinner(this.board[bb])
@@ -71,10 +70,8 @@ module.exports = class UltimateTicTacToe {
             this.lastMove = [bb, sb]
             this.nextMoves = this.calculateNextMoves()
             this.turn *= -1;
-            if (this.winner !== 0) {
-                console.log("the winner is")
-                console.log(this.winner)
-            }
+            return true;
         }
+        return false;
     }
 }

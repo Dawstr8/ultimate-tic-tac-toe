@@ -1,16 +1,17 @@
 import axios from 'axios';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import './Board.css'
 
 import SmallBoard from './SmallBoard';
 
 interface Board {
     socket: any;
+    room: string;
     setRoom: (value: null | string | ((prevState: null | string) => null | string)) => void;
 }
 
 
-export default function Board({ socket, setRoom }: Board) {
+export default function Board({ socket, room, setRoom }: Board) {
 
     const [board, setBoard] = useState<number[][]>(
        [[0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -42,26 +43,11 @@ export default function Board({ socket, setRoom }: Board) {
     }
 
     function startGame(): void {
-        axios.get('http://localhost:8080/startGame')
-        .then((response) => {
-            setBoard(response.data.board)
-            setBigBoard(response.data.bigBoard)
-            setNextMoves(response.data.nextMoves)
-            setTurn(response.data.turn)
-            setWinner(response.data.winner)
-            console.log(response.data);
-        });
+        socket.emit("start game", room)
     }
 
     function makeMove(bb: number, sb: number): void {
-        axios.get('http://localhost:8080/makeMove', {params: { bb: String(bb), sb: String(sb) }})
-        .then((response) => {
-            setBoard(response.data.board)
-            setBigBoard(response.data.bigBoard)
-            setNextMoves(response.data.nextMoves)
-            setTurn(response.data.turn)
-            setWinner(response.data.winner)
-        });
+        socket.emit("make move", room, bb, sb)
     }
 
     function randomMove(): void {
@@ -79,6 +65,18 @@ export default function Board({ socket, setRoom }: Board) {
             setRoom(null)
         }
     }
+
+    useEffect(() => {
+        if (socket !== null) {
+            socket.on("game state changed", (...args: any) => {
+                setBoard(args[0].board)
+                setBigBoard(args[0].bigBoard)
+                setNextMoves(args[0].nextMoves)
+                setTurn(args[0].turn)
+                setWinner(args[0].winner)
+            });
+        }
+    }, [socket, setBoard, setBigBoard, setNextMoves, setTurn, setWinner]);
 
     return (
         <div className='board'>
