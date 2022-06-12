@@ -74,7 +74,7 @@ io.on('connection', (socket) => {
   });
 
   socket.on("start game", ( roomId ) => {
-    if (roomId in rooms) {
+    if (roomId in rooms && rooms[roomId].players.length == 2) {
       rooms[roomId].game = new UltimateTicTacToe();
       io.to(rooms[roomId].players[0]).to(rooms[roomId].players[1]).emit('game state changed', rooms[roomId].game)
     }
@@ -103,7 +103,7 @@ io.on('connection', (socket) => {
   });
 
   socket.on("leave room", () => {
-    const result = leaveRoom(socket.id)
+    const result = leaveRoom(socket.id);
     if (result) {
       io.emit("room list update", getRoomsList());
     }

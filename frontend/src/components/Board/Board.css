@@ -1,4 +1,8 @@
 .board {
+    position: relative;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
     display: inline-block;
     height: 39.6vw;
     width: 39.6vw;
@@ -11,12 +15,12 @@
     border: 0.15vw black solid;
 }
 
-.red {
-    border: 0.15vw red solid;
+.red-border {
+    border: 0.15vw #F5185F solid;
 }
 
-.blue {
-    border: 0.15vw blue solid;
+.blue-border {
+    border: 0.15vw #00C0F4 solid;
 }
 
 .field {
@@ -30,11 +34,11 @@
 }
 
 .field-x {
-    color: red;
+    color: #F5185F;
 }
 
 .field-o {
-    color: blue;
+    color: #00C0F4;
 }
 
 .big-field {

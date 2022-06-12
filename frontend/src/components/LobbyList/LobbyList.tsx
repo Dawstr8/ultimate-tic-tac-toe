@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 import ILobbyItem from '../../types/ILobbyItem';
+import './LobbyList.css'
 
 interface LobbyList {
     socket: any;
@@ -47,16 +48,16 @@ export default function LobbyList({ socket, setRoom } : LobbyList) {
  
 
     return (
-        <div>
+        <div className='list'>
             {lobbyList.map((elem) => {
                 return (
-                <div>
-                    {elem.id} {elem.player1} {elem.player2}
+                <div className='lobby-item'>
+                    <div className='lobby-item-text'>{elem.id} {elem.player1} {elem.player2}</div>
                     <button onClick={() => joinRoom(elem.id)}>Join room</button>
                 </div>
                 )
             })}
-            <button onClick={() => createRoom()}>Create room</button>
+            <button className='center-button' onClick={() => createRoom()}>Create room</button>
         </div>
     );
 }

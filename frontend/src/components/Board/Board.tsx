@@ -1,4 +1,3 @@
-import axios from 'axios';
 import { useEffect, useState } from 'react';
 import './Board.css'
 
@@ -33,9 +32,9 @@ export default function Board({ socket, room, setRoom }: Board) {
     function whatColor(id: number): string {
         if (nextMoves.includes(id)) {
             if (turn === 1) {
-                return 'red';
+                return 'red-border';
             } else {
-                return 'blue';
+                return 'blue-border';
             }
         } else {
             return '';
