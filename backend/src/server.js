@@ -10,6 +10,8 @@ const io = new Server(server);
 const crypto = require('crypto')
 
 var UltimateTicTacToe = require('./uttt.js')
+var User = require('./user.js')
+var Room = require('./room.js')
 
 let game = null;
 const port = 8080;
@@ -55,18 +57,13 @@ app.get('/getRoomsList', (req, res) => {
 io.on('connection', (socket) => {
   console.log('a user connected')
 
-  users[socket.id] = {
-    roomId: null
-  }
+  users[socket.id] = new User(socket.id);
 
   socket.on("create room", ( callback ) => {
     if (users[socket.id].roomId === null) {
-      const roomId = crypto.randomUUID()
-      users[socket.id].roomId = roomId
-      rooms[roomId] = {
-        players: [socket.id],
-        game: null
-      }
+      const roomId = crypto.randomUUID();
+      users[socket.id].setRoomId(roomId);
+      rooms[roomId] = new Room(roomId, socket.id);
       
       io.emit("room list update", getRoomsList());
       callback(roomId)
@@ -74,44 +71,55 @@ io.on('connection', (socket) => {
   });
 
   socket.on("start game", ( roomId ) => {
-    if (roomId in rooms && rooms[roomId].players.length == 2) {
-      rooms[roomId].game = new UltimateTicTacToe();
-      io.to(rooms[roomId].players[0]).to(rooms[roomId].players[1]).emit('game state changed', rooms[roomId].game)
+    if (roomId in rooms) {
+      const room = rooms[roomId];
+      const result = room.startGame(socket.id);
+      if (result) {
+        for (let i = 0; i < room.users.length; i++) {
+          io.to(room.users[i]).emit('game state changed', room.game);
+        }
+      }
     }
   });
 
   socket.on("make move", ( roomId, bb, sb ) => {
     if (roomId in rooms) {
-      let result;
-      if ((rooms[roomId].game.turn === -1 && socket.id === rooms[roomId].players[0]) || (rooms[roomId].game.turn === 1 && socket.id === rooms[roomId].players[1])) {
-        result = rooms[roomId].game.makeMove(bb, sb);
-      }
+      const room = rooms[roomId];
+      const result = room.makeMove(socket.id, bb, sb);
       if (result) {
-        io.to(rooms[roomId].players[0]).to(rooms[roomId].players[1]).emit('game state changed', rooms[roomId].game)
+        for (let i = 0; i < room.users.length; i++) {
+          io.to(room.users[i]).emit('game state changed', room.game);
+        }
       }
     }
   });
 
   socket.on("join room", ( roomId, callback ) => {
-    if (users[socket.id].roomId === null && rooms[roomId].players.length < 2) {
-      users[socket.id].roomId = roomId
-      rooms[roomId].players.push(socket.id)
-
-      io.emit("room list update", getRoomsList());
-      callback(roomId)
+    if (roomId in rooms) {
+      const room = rooms[roomId];
+      if (users[socket.id].roomId === null) {
+        users[socket.id].setRoomId(roomId)
+        room.joinRoom(socket.id);
+        io.emit("room list update", getRoomsList());
+        callback(roomId)
+      }
     }
   });
 
   socket.on("leave room", () => {
-    const result = leaveRoom(socket.id);
-    if (result) {
+    let roomId = users[socket.id].roomId;
+    if (roomId in rooms) {
+      const room = rooms[roomId];
+      room.leaveRoom(socket.id);
       io.emit("room list update", getRoomsList());
     }
   });
 
   socket.on('disconnect', () => {
-    const result = leaveRoom(socket.id)
-    if (result) {
+    let roomId = users[socket.id].roomId;
+    if (roomId in rooms) {
+      const room = rooms[roomId];
+      room.leaveRoom(socket.id);
       io.emit("room list update", getRoomsList());
     }
     console.log('user disconnected');
@@ -132,19 +140,7 @@ const getRoomsList = () => {
   return roomsList;
 }
 
-const leaveRoom = ( playerId ) => {
-  const roomId = users[playerId].roomId
-  if (roomId !== null) {
-    users[playerId].roomId = null;
-    if (rooms[roomId].players.length === 1) {
-      delete rooms[roomId];
-    } else if (rooms[roomId].players.length === 2) {
-      rooms[roomId].players = rooms[roomId].players.filter((id) => id !== playerId);
-    }
-    return true;
-  }
-  return false;
-}
+
 
 server.listen(port, () => {
   console.log(`Example app listening on port ${port}`)

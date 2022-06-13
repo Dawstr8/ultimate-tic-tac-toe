@@ -44,7 +44,6 @@ module.exports = class UltimateTicTacToe {
         for (let i = 0; i < 8; i += 1) {
             let winningPosition = winningPositions[i];
             if (board[winningPosition[0]] === board[winningPosition[1]] && board[winningPosition[0]] === board[winningPosition[2]] && board[winningPosition[0]] !== 0  && board[winningPosition[0]] !== 2) {
-                console.log(board[winningPosition[0]])
                 return board[winningPosition[0]];
             }
         }
@@ -57,8 +56,6 @@ module.exports = class UltimateTicTacToe {
         }
 
         //draw
-        console.log("draw on");
-        console.log(board);
         return 2;
     }
 
