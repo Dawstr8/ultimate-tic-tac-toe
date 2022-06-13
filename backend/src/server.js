@@ -106,12 +106,28 @@ io.on('connection', (socket) => {
     }
   });
 
+  socket.on("pick side", ( roomId, side ) => {
+    if (roomId in rooms) {
+      const room = rooms[roomId];
+      const result = room.pickSide(socket.id, side);
+      if (result) {
+        for (let i = 0; i < room.users.length; i++) {
+          io.to(room.users[i]).emit('players state changed', room.players);
+        }
+      }
+    }
+  });
+
   socket.on("leave room", () => {
     let roomId = users[socket.id].roomId;
     if (roomId in rooms) {
       const room = rooms[roomId];
-      room.leaveRoom(socket.id);
-      io.emit("room list update", getRoomsList());
+      const result = room.leaveRoom(socket.id);
+      if (result === 0) {
+        delete rooms[roomId];
+        io.emit("room list update", getRoomsList());
+      }
+      users[socket.id].resetRoomId();
     }
   });
 
@@ -119,8 +135,12 @@ io.on('connection', (socket) => {
     let roomId = users[socket.id].roomId;
     if (roomId in rooms) {
       const room = rooms[roomId];
-      room.leaveRoom(socket.id);
-      io.emit("room list update", getRoomsList());
+      const result = room.leaveRoom(socket.id);
+      if (result === 0) {
+        delete rooms[roomId];
+        io.emit("room list update", getRoomsList());
+      }
+      users[socket.id].resetRoomId();
     }
     console.log('user disconnected');
   });
@@ -139,8 +159,6 @@ const getRoomsList = () => {
   }
   return roomsList;
 }
-
-
 
 server.listen(port, () => {
   console.log(`Example app listening on port ${port}`)

@@ -24,6 +24,7 @@ export default function Board({ socket, room, setRoom }: Board) {
         [0, 0, 0, 0, 0, 0, 0, 0, 0]]);
 
     const [bigBoard, setBigBoard] = useState<number[]>([0, 0, 0, 0, 0, 0, 0, 0, 0])
+    const [players, setPlayers] = useState<null[] | string[]>([null, null])
 
     const [nextMoves, setNextMoves] = useState<number[]>([]);
     const [turn, setTurn] = useState<number>(1);
@@ -65,6 +66,12 @@ export default function Board({ socket, room, setRoom }: Board) {
         }
     }
 
+    function pickSide(side: number): void {
+        if (socket !== null) {
+            socket.emit("pick side", room, side);
+        }
+    }
+
     useEffect(() => {
         if (socket !== null) {
             socket.on("game state changed", (...args: any) => {
@@ -77,11 +84,20 @@ export default function Board({ socket, room, setRoom }: Board) {
         }
     }, [socket, setBoard, setBigBoard, setNextMoves, setTurn, setWinner]);
 
+    useEffect(() => {
+        if (socket !== null) {
+            socket.on("players state changed", (...args: any) => {
+                setPlayers(args[0]);
+            });
+        }
+    }, [socket, setBoard, setBigBoard, setNextMoves, setTurn, setWinner]);
+
     return (
         <div className='board'>
             <div>
+                <div>X:{players[0]} {(players[0] === socket.id) && "(you)"} O:{players[1]} {(players[1] === socket.id) && "(you)"}</div>
             {board.map((smallBoard, bb) => {
-                if (bigBoard[bb] === 0 || bigBoard[bb] === 2) {
+                if (bigBoard[bb] === 0 || bigBoard[bb] === -1) {
                     return (
                         <SmallBoard bb={bb} smallBoard={smallBoard} makeMove={makeMove} color={whatColor(bb)}/>
                     )
@@ -97,11 +113,15 @@ export default function Board({ socket, room, setRoom }: Board) {
             })}
             </div>
             {winner === 1 && <div>The winner is X</div>}
-            {winner === -1 && <div>The winner is O</div>}
-            {winner === 2 && <div>Draw</div>}
+            {winner === 2 && <div>The winner is O</div>}
+            {winner === -1 && <div>Draw</div>}
             <button onClick={() => startGame()}>Start game</button>
             <button onClick={() => randomMove()}>Random Move</button>
             <button onClick={() => leaveRoom()}>Leave room</button>
+            <div>
+                <button onClick={() => pickSide(1)}>{(players[0] !== socket.id) ? "Pick " : "Unpick "} X</button>
+                <button onClick={() => pickSide(2)}>{(players[1] !== socket.id) ? "Pick " : "Unpick "} O</button>
+            </div>
             
         </div>
     );

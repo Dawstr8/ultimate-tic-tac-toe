@@ -13,7 +13,7 @@ module.exports = class UltimateTicTacToe {
             [0, 0, 0, 0, 0, 0, 0, 0, 0]],
             nextMoves = [0, 1, 2, 3, 4, 5, 6, 7, 8],
             lastMove = null,
-            turn = Math.pow(-1, [Math.floor(Math.random() * 2)]),
+            turn = 1 + Math.floor(Math.random() * 2),
             winner = 0) {
         this.bigBoard = bigBoard;
         this.board = board;
@@ -43,20 +43,16 @@ module.exports = class UltimateTicTacToe {
         const winningPositions = [[0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 4, 8], [2, 4, 6]]
         for (let i = 0; i < 8; i += 1) {
             let winningPosition = winningPositions[i];
-            if (board[winningPosition[0]] === board[winningPosition[1]] && board[winningPosition[0]] === board[winningPosition[2]] && board[winningPosition[0]] !== 0  && board[winningPosition[0]] !== 2) {
+            if (board[winningPosition[0]] === board[winningPosition[1]] && board[winningPosition[0]] === board[winningPosition[2]] && board[winningPosition[0]] !== 0 && board[winningPosition[0]] !== -1) {
                 return board[winningPosition[0]];
             }
         }
-
-        //if there's no winner and there's no free field, it's draw
-        for (let i = 0; i < 8; i += 1) {
+        for (let i = 0; i < 9; i += 1) {
             if (board[i] === 0) {
                 return 0;
             }
         }
-
-        //draw
-        return 2;
+        return -1;
     }
 
     makeMove(bb, sb) {
@@ -66,7 +62,11 @@ module.exports = class UltimateTicTacToe {
             this.winner = this.checkWinner(this.bigBoard)
             this.lastMove = [bb, sb]
             this.nextMoves = this.calculateNextMoves()
-            this.turn *= -1;
+            this.turn = (this.turn % 2) + 1;
+            if (this.winner === -1) {
+                console.log(this.bigBoard);
+                console.log(this.board)
+            }
             return true;
         }
         return false;
