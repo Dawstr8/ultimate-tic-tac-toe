@@ -1,12 +1,21 @@
 var UltimateTicTacToe = require('./uttt.js')
 
 module.exports = class Room {
-    constructor(roomId, creator){
+    constructor(roomId, type, player1, player2=null){
         this.roomId = roomId;
-        this.users = [creator];
-        this.players = [null, null];
-        this.game = null;
-        this.roomEmpty = false;
+        this.type = type;
+
+        if (type === "normal") {
+            this.users = [player1];
+            this.players = [null, null];
+            this.game = null;
+        } else if (type === "random") {
+            this.users = [player1, player2];
+            this.players = [player1, player2].sort((a, b) => 0.5 - Math.random())
+            this.game = new UltimateTicTacToe();
+            this.startGame();
+        }
+        
     }
 
     startGame(userId) {
@@ -32,7 +41,9 @@ module.exports = class Room {
     }
 
     joinRoom(userId) {
-        this.users.push(userId);
+        if (this.type === "normal") {
+            this.users.push(userId);
+        }
     }
 
     leaveRoom(userId) {
@@ -49,6 +60,9 @@ module.exports = class Room {
         }
 
         if (this.players[0] === null || this.players[1] === null) {
+            if (this.type === "random") {
+                return 3;
+            }
             //1 means that player left the room and new player should be picked
             return 1;
         }

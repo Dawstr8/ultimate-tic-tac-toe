@@ -19,6 +19,9 @@ const port = 8080;
 const rooms = {}
 const users = {}
 
+const duelQueue = []
+const duelRooms = {}
+
 app.get('/', (req, res) => {
   res.send('Hello World!')
 })
@@ -59,15 +62,36 @@ io.on('connection', (socket) => {
 
   users[socket.id] = new User(socket.id);
 
-  socket.on("create room", ( callback ) => {
+  socket.on("leave random game", () => {
+  });
+
+  socket.on("create room", ( type, callback ) => {
+    let roomId = null;
     if (users[socket.id].roomId === null) {
-      const roomId = crypto.randomUUID();
-      users[socket.id].setRoomId(roomId);
-      rooms[roomId] = new Room(roomId, socket.id);
-      
-      io.emit("room list update", getRoomsList());
-      callback(roomId)
+      roomId = "waiting";
+      if (type === "random" && duelQueue.length === 0) {
+        duelQueue.push(socket.id);
+      } else {
+        roomId = crypto.randomUUID();
+        users[socket.id].setRoomId(roomId);
+
+        if (type === "normal") {
+          rooms[roomId] = new Room(roomId, type, socket.id);
+          io.emit("room list update", getRoomsList());
+
+        } else if (type === "random") {
+          const player2 = duelQueue.pop();
+          users[player2].setRoomId(roomId);
+          rooms[roomId] = new Room(roomId, type, socket.id, player2);
+          
+          for (let i = 0; i < rooms[roomId].users.length; i++) {
+            io.to(rooms[roomId].users[i]).emit('room found', roomId, rooms[roomId].players, rooms[roomId].game);
+          }
+        }
+      }
     }
+    callback(roomId);
+    
   });
 
   socket.on("start game", ( roomId ) => {
@@ -95,15 +119,17 @@ io.on('connection', (socket) => {
   });
 
   socket.on("join room", ( roomId, callback ) => {
+    let result = null;
     if (roomId in rooms) {
+      result = roomId;
       const room = rooms[roomId];
       if (users[socket.id].roomId === null) {
         users[socket.id].setRoomId(roomId)
         room.joinRoom(socket.id);
         io.emit("room list update", getRoomsList());
-        callback(roomId)
       }
     }
+    callback(result);
   });
 
   socket.on("pick side", ( roomId, side ) => {
@@ -140,7 +166,7 @@ io.on('connection', (socket) => {
         delete rooms[roomId];
         io.emit("room list update", getRoomsList());
       }
-      users[socket.id].resetRoomId();
+      delete users[socket.id];
     }
     console.log('user disconnected');
   });
@@ -150,11 +176,13 @@ const getRoomsList = () => {
   var roomsList = [];
   for (var key in rooms) {
     if (rooms.hasOwnProperty(key)) {
-      roomsList.push({
-        id: key,
-        player1: rooms[key].players[0],
-        player2: rooms[key].players[1]
-      });
+      if (rooms[key].type === "normal"){
+        roomsList.push({
+          id: key,
+          player1: rooms[key].players[0],
+          player2: rooms[key].players[1]
+        });
+      }
     }
   }
   return roomsList;

@@ -5,24 +5,32 @@ import './LobbyList.css'
 
 interface LobbyList {
     socket: any;
+    room: null | string;
     setRoom: (value: null | string | ((prevState: null | string) => null | string)) => void;
+    setType: (value: null | string | ((prevState: null | string) => null | string)) => void;
 }
 
-export default function LobbyList({ socket, setRoom } : LobbyList) {
+export default function LobbyList({ socket, room, setRoom, setType } : LobbyList) {
 
     const [lobbyList, setLobbyList] = useState<Array<ILobbyItem>>([])
 
     function joinRoom(id: string): void {
         if (socket !== null) {
             socket.emit("join room", id, (response : string) => {
+                if (response !== null) {
+                    setType("normal");
+                }
                 setRoom(response);
             });
         }
     }
 
-    function createRoom(): void {
+    function createRoom(type: string): void {
         if (socket !== null) {
-            socket.emit("create room", (response : string) => {
+            socket.emit("create room", type, (response : string) => {
+                if (response !== null) {
+                    setType(type);
+                } 
                 setRoom(response);
             });
         }
@@ -49,15 +57,18 @@ export default function LobbyList({ socket, setRoom } : LobbyList) {
 
     return (
         <div className='list'>
-            {lobbyList.map((elem) => {
-                return (
-                <div className='lobby-item'>
-                    <div className='lobby-item-text'>{elem.id} {elem.player1} {elem.player2}</div>
-                    <button onClick={() => joinRoom(elem.id)}>Join room</button>
-                </div>
-                )
-            })}
-            <button className='center-button' onClick={() => createRoom()}>Create room</button>
+            <div>
+                {lobbyList.map((elem) => {
+                    return (
+                    <div className='lobby-item'>
+                        <div className='lobby-item-text'>{elem.id} {elem.player1} {elem.player2}</div>
+                        <button onClick={() => joinRoom(elem.id)}>Join room</button>
+                    </div>
+                    )
+                })}
+                <button className='center-button' onClick={() => createRoom("normal")}>Create room</button>
+                <button className='center-button' onClick={() => createRoom("random")}>Join random game</button>
+            </div>
         </div>
     );
 }
