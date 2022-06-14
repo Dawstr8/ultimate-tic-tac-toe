@@ -23,6 +23,10 @@ module.exports = class UltimateTicTacToe {
         this.winner = winner;
     }
 
+    setWinner(winner) {
+        this.winner = winner;
+    }
+
     calculateNextMoves() {
         let nextMoves = []
         if (this.winner === 0) {

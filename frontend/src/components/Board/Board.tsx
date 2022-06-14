@@ -68,6 +68,17 @@ export default function Board({ socket, room, setRoom, type, setType, board, set
         }
     }
 
+    function createRoom(type: string): void {
+        if (socket !== null) {
+            socket.emit("create room", type, (response : string) => {
+                if (response !== null) {
+                    setType(type);
+                } 
+                setRoom(response);
+            });
+        }
+    }
+
     useEffect(() => {
         if (socket !== null) {
             socket.on("game state changed", (...args: any) => {
@@ -116,20 +127,30 @@ export default function Board({ socket, room, setRoom, type, setType, board, set
                         }
                     })}
                 </div>
-                {winner === 1 && <div>The winner is X</div>}
-                {winner === 2 && <div>The winner is O</div>}
-                {winner === -1 && <div>Draw</div>}
-               
+                {(winner !== 0) &&
+                    <div>
+                    {winner === -1 ?
+                        <div>
+                            Game ended in draw
+                        </div>
+                            :
+                        <div>You have {(players[winner-1] === socket.id) ? "won" : "lost"}</div>
+                    }
+                    </div>
+                }
                 <button onClick={() => leaveRoom()}>Leave room</button>
-                {type === "normal" &&
+                {type === "normal" ?
                     <div>
                         <button onClick={() => startGame()}>Start game</button>
                         <button onClick={() => randomMove()}>Random Move</button>
                         <div>
-                        <button onClick={() => pickSide(1)}>{(players[0] !== socket.id) ? "Pick " : "Unpick "} X</button>
-                        <button onClick={() => pickSide(2)}>{(players[1] !== socket.id) ? "Pick " : "Unpick "} O</button>
-                        </div>
-                        
+                            <button onClick={() => pickSide(1)}>{(players[0] !== socket.id) ? "Pick " : "Unpick "} X</button>
+                            <button onClick={() => pickSide(2)}>{(players[1] !== socket.id) ? "Pick " : "Unpick "} O</button>
+                        </div>       
+                    </div>
+                    :
+                    <div>
+                        {winner !== 0 && <button onClick={() => createRoom("random")}>New random game</button>}
                     </div>
                 }
 

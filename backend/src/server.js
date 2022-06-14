@@ -62,31 +62,29 @@ io.on('connection', (socket) => {
 
   users[socket.id] = new User(socket.id);
 
-  socket.on("leave random game", () => {
-  });
-
   socket.on("create room", ( type, callback ) => {
     let roomId = null;
-    if (users[socket.id].roomId === null) {
-      roomId = "waiting";
-      if (type === "random" && duelQueue.length === 0) {
-        duelQueue.push(socket.id);
-      } else {
-        roomId = crypto.randomUUID();
-        users[socket.id].setRoomId(roomId);
+    if (users[socket.id].roomId !== null) {
+      leaveRoom(socket, io);
+    }
+    roomId = "waiting";
+    if (type === "random" && duelQueue.length === 0) {
+      duelQueue.push(socket.id);
+    } else {
+      roomId = crypto.randomUUID();
+      users[socket.id].setRoomId(roomId);
 
-        if (type === "normal") {
-          rooms[roomId] = new Room(roomId, type, socket.id);
-          io.emit("room list update", getRoomsList());
+      if (type === "normal") {
+        rooms[roomId] = new Room(roomId, type, socket.id);
+        io.emit("room list update", getRoomsList());
 
-        } else if (type === "random") {
-          const player2 = duelQueue.pop();
-          users[player2].setRoomId(roomId);
-          rooms[roomId] = new Room(roomId, type, socket.id, player2);
+      } else if (type === "random") {
+        const player2 = duelQueue.pop();
+        users[player2].setRoomId(roomId);
+        rooms[roomId] = new Room(roomId, type, socket.id, player2);
           
-          for (let i = 0; i < rooms[roomId].users.length; i++) {
-            io.to(rooms[roomId].users[i]).emit('room found', roomId, rooms[roomId].players, rooms[roomId].game);
-          }
+        for (let i = 0; i < rooms[roomId].users.length; i++) {
+          io.to(rooms[roomId].users[i]).emit('room found', roomId, rooms[roomId].players, rooms[roomId].game);
         }
       }
     }
@@ -145,16 +143,7 @@ io.on('connection', (socket) => {
   });
 
   socket.on("leave room", () => {
-    let roomId = users[socket.id].roomId;
-    if (roomId in rooms) {
-      const room = rooms[roomId];
-      const result = room.leaveRoom(socket.id);
-      if (result === 0) {
-        delete rooms[roomId];
-        io.emit("room list update", getRoomsList());
-      }
-      users[socket.id].resetRoomId();
-    }
+    leaveRoom(socket, io)
   });
 
   socket.on('disconnect', () => {
@@ -186,6 +175,29 @@ const getRoomsList = () => {
     }
   }
   return roomsList;
+}
+
+const leaveRoom = (socket, io) => {
+  let roomId = users[socket.id].roomId;
+  if (roomId in rooms) {
+    const room = rooms[roomId];
+    const result = room.leaveRoom(socket.id);
+    if (result === 0) {
+      delete rooms[roomId];
+      io.emit("room list update", getRoomsList());
+    }
+    if (result === 3) {
+      let winner;
+      if (room.players[0] === null) {
+        winner = 2;
+      } else {
+        winner = 1;
+      }
+      room.game.setWinner(winner);
+      io.to(room.users[0]).emit('game state changed', room.game);
+    }
+    users[socket.id].resetRoomId();
+  }
 }
 
 server.listen(port, () => {
