@@ -143,20 +143,13 @@ io.on('connection', (socket) => {
   });
 
   socket.on("leave room", () => {
-    leaveRoom(socket, io)
+    leaveRoom(socket, io);
+    users[socket.id].resetRoomId();
   });
 
   socket.on('disconnect', () => {
-    let roomId = users[socket.id].roomId;
-    if (roomId in rooms) {
-      const room = rooms[roomId];
-      const result = room.leaveRoom(socket.id);
-      if (result === 0) {
-        delete rooms[roomId];
-        io.emit("room list update", getRoomsList());
-      }
-      delete users[socket.id];
-    }
+    leaveRoom(socket, io);
+    delete users[socket.id];
     console.log('user disconnected');
   });
 })
@@ -196,7 +189,6 @@ const leaveRoom = (socket, io) => {
       room.game.setWinner(winner);
       io.to(room.users[0]).emit('game state changed', room.game);
     }
-    users[socket.id].resetRoomId();
   }
 }
 
