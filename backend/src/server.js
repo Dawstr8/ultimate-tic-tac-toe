@@ -53,6 +53,22 @@ app.get('/makeMove', (req, res) => {
     });
 })
 
+app.get('/getGameInfo', (req, res) => {
+  const roomId = req.query.roomId;
+  if (roomId in rooms) {
+    console.log("HERE2")
+    const room = rooms[roomId];
+    res.send({
+      board: room.game.board,
+      bigBoard: room.game.bigBoard,
+      nextMoves: room.game.nextMoves,
+      turn: room.game.turn,
+      winner: room.game.winner,
+      players: room.players
+    })
+  }
+})
+
 app.get('/getRoomsList', (req, res) => {
   res.send(getRoomsList())
 })
@@ -89,7 +105,6 @@ io.on('connection', (socket) => {
       }
     }
     callback(roomId);
-    
   });
 
   socket.on("start game", ( roomId ) => {

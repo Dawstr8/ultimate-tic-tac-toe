@@ -1,3 +1,4 @@
+import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
 import './App.css';
@@ -53,10 +54,22 @@ function App() {
     }
 }, [socket, setRoom, setPlayers, setBoard, setBigBoard, setNextMoves, setTurn, setWinner, setType]);
 
+function getGameInfo(roomId: any): void {
+  axios.get('http://localhost:8080/getGameInfo', { params: { roomId: roomId } })
+  .then((response) => {
+      setPlayers(response.data.players);
+      setBoard(response.data.board)
+      setBigBoard(response.data.bigBoard)
+      setNextMoves(response.data.nextMoves)
+      setTurn(response.data.turn)
+      setWinner(response.data.winner)
+  });
+}
+
   return (
     <div className="bg">
       {(room === null)?
-        <LobbyList room={room} setRoom={setRoom} setType={setType} socket={socket}/>
+        <LobbyList getGameInfo={getGameInfo} room={room} setRoom={setRoom} setType={setType} socket={socket}/>
         :
         <Board
           room={room} setRoom={setRoom} 

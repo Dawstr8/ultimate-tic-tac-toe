@@ -8,9 +8,10 @@ interface LobbyList {
     room: null | string;
     setRoom: (value: null | string | ((prevState: null | string) => null | string)) => void;
     setType: (value: null | string | ((prevState: null | string) => null | string)) => void;
+    getGameInfo: any;
 }
 
-export default function LobbyList({ socket, room, setRoom, setType } : LobbyList) {
+export default function LobbyList({ socket, room, setRoom, setType, getGameInfo } : LobbyList) {
 
     const [lobbyList, setLobbyList] = useState<Array<ILobbyItem>>([])
 
@@ -21,6 +22,8 @@ export default function LobbyList({ socket, room, setRoom, setType } : LobbyList
                     setType("normal");
                 }
                 setRoom(response);
+                console.log(response);
+                getGameInfo(response);
             });
         }
     }

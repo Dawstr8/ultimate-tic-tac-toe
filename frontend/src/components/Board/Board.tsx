@@ -1,3 +1,4 @@
+import axios from 'axios';
 import { useEffect, useState } from 'react';
 import './Board.css'
 
@@ -5,7 +6,7 @@ import SmallBoard from './SmallBoard';
 
 interface Board {
     socket: any;
-    room: null | string;
+    room: any;
     setRoom: (value: null | string | ((prevState: null | string) => null | string)) => void;
     type: null | string;
     setType: (value: null | string | ((prevState: null | string) => null | string)) => void;
@@ -24,7 +25,6 @@ interface Board {
 }
 
 export default function Board({ socket, room, setRoom, type, setType, board, setBoard, bigBoard, setBigBoard, players, setPlayers, turn, setTurn, nextMoves, setNextMoves, winner, setWinner }: Board) {
-
 
     function whatColor(id: number): string {
         if (nextMoves.includes(id)) {
@@ -59,6 +59,24 @@ export default function Board({ socket, room, setRoom, type, setType, board, set
         if (socket !== null) {
             socket.emit("leave room");
             setRoom(null)
+
+            setPlayers([null, null]);
+
+            setBoard([[0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0]])
+            setBigBoard([0, 0, 0, 0, 0, 0, 0, 0, 0])
+            setNextMoves([])
+            setTurn(1)
+            setWinner(0)
+
+            setType(null);
         }
     }
 
