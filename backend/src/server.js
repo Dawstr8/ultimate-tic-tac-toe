@@ -20,7 +20,6 @@ const rooms = {}
 const users = {}
 
 const duelQueue = []
-const duelRooms = {}
 
 app.get('/', (req, res) => {
   res.send('Hello World!')
@@ -56,14 +55,24 @@ app.get('/makeMove', (req, res) => {
 app.get('/getGameInfo', (req, res) => {
   const roomId = req.query.roomId;
   if (roomId in rooms) {
-    console.log("HERE2")
+    const room = rooms[roomId];
+    if (room.game !== null) {
+      res.send({
+        board: room.game.board,
+        bigBoard: room.game.bigBoard,
+        nextMoves: room.game.nextMoves,
+        turn: room.game.turn,
+        winner: room.game.winner,
+      })
+    }
+  }
+})
+
+app.get('/getPlayersInfo', (req, res) => {
+  const roomId = req.query.roomId;
+  if (roomId in rooms) {
     const room = rooms[roomId];
     res.send({
-      board: room.game.board,
-      bigBoard: room.game.bigBoard,
-      nextMoves: room.game.nextMoves,
-      turn: room.game.turn,
-      winner: room.game.winner,
       players: room.players
     })
   }
@@ -153,6 +162,7 @@ io.on('connection', (socket) => {
         for (let i = 0; i < room.users.length; i++) {
           io.to(room.users[i]).emit('players state changed', room.players);
         }
+        io.emit("room list update", getRoomsList());
       }
     }
   });
@@ -202,7 +212,10 @@ const leaveRoom = (socket, io) => {
         winner = 1;
       }
       room.game.setWinner(winner);
-      io.to(room.users[0]).emit('game state changed', room.game);
+    }
+    for (let i = 0; i < room.users.length; i++) {
+      io.to(room.users[i]).emit('players state changed', room.players);
+      io.to(room.users[i]).emit('game state changed', room.game);
     }
   }
 }

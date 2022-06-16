@@ -49,7 +49,8 @@ module.exports = class Room {
     leaveRoom(userId) {
         if (this.players[0] == userId) {
             this.players[0] = null;
-        } else if (this.players[1] == userId) {
+        }
+        if (this.players[1] == userId) {
             this.players[1] = null;
         }
 

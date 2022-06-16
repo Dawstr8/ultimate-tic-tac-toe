@@ -52,24 +52,30 @@ function App() {
             setType("random");
         });
     }
-}, [socket, setRoom, setPlayers, setBoard, setBigBoard, setNextMoves, setTurn, setWinner, setType]);
+  }, [socket, setRoom, setPlayers, setBoard, setBigBoard, setNextMoves, setTurn, setWinner, setType]);
 
-function getGameInfo(roomId: any): void {
-  axios.get('http://localhost:8080/getGameInfo', { params: { roomId: roomId } })
-  .then((response) => {
-      setPlayers(response.data.players);
-      setBoard(response.data.board)
-      setBigBoard(response.data.bigBoard)
-      setNextMoves(response.data.nextMoves)
-      setTurn(response.data.turn)
-      setWinner(response.data.winner)
-  });
-}
+  function getGameInfo(roomId: string): void {
+    axios.get('http://localhost:8080/getGameInfo', { params: { roomId: roomId } })
+    .then((response) => {
+        setBoard(response.data.board)
+        setBigBoard(response.data.bigBoard)
+        setNextMoves(response.data.nextMoves)
+        setTurn(response.data.turn)
+        setWinner(response.data.winner)
+    });
+  }
+
+  function getPlayersInfo(roomId: string): void {
+    axios.get('http://localhost:8080/getPlayersInfo', { params: { roomId: roomId } })
+    .then((response) => {
+        setPlayers(response.data.players);
+    });
+  }
 
   return (
     <div className="bg">
       {(room === null)?
-        <LobbyList getGameInfo={getGameInfo} room={room} setRoom={setRoom} setType={setType} socket={socket}/>
+        <LobbyList getGameInfo={getGameInfo} getPlayersInfo={getPlayersInfo} setRoom={setRoom} setType={setType} socket={socket}/>
         :
         <Board
           room={room} setRoom={setRoom} 

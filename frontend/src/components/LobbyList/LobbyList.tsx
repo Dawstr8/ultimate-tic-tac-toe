@@ -5,13 +5,13 @@ import './LobbyList.css'
 
 interface LobbyList {
     socket: any;
-    room: null | string;
     setRoom: (value: null | string | ((prevState: null | string) => null | string)) => void;
     setType: (value: null | string | ((prevState: null | string) => null | string)) => void;
-    getGameInfo: any;
+    getGameInfo: (roomId: string) => void;
+    getPlayersInfo: (roomId: string) => void;
 }
 
-export default function LobbyList({ socket, room, setRoom, setType, getGameInfo } : LobbyList) {
+export default function LobbyList({ socket, setRoom, setType, getGameInfo, getPlayersInfo } : LobbyList) {
 
     const [lobbyList, setLobbyList] = useState<Array<ILobbyItem>>([])
 
@@ -22,7 +22,7 @@ export default function LobbyList({ socket, room, setRoom, setType, getGameInfo 
                     setType("normal");
                 }
                 setRoom(response);
-                console.log(response);
+                getPlayersInfo(response);
                 getGameInfo(response);
             });
         }
