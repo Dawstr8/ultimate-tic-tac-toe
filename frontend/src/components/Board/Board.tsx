@@ -149,7 +149,7 @@ export default function Board({ socket, room, setRoom, type, setType, board, set
                     <div>
                     {winner === -1 ?
                         <div>
-                            Game ended in draw
+                            Draw
                         </div>
                             :
                         <div>You have {(players[winner-1] === socket.id) ? "won" : "lost"}</div>
@@ -162,8 +162,8 @@ export default function Board({ socket, room, setRoom, type, setType, board, set
                         <button onClick={() => startGame()}>Start game</button>
                         <button onClick={() => randomMove()}>Random Move</button>
                         <div>
-                            <button onClick={() => pickSide(1)}>{(players[0] !== socket.id) ? "Pick " : "Unpick "} X</button>
-                            <button onClick={() => pickSide(2)}>{(players[1] !== socket.id) ? "Pick " : "Unpick "} O</button>
+                            {(players[0] === null || players[0] === socket.id) && <button onClick={() => pickSide(1)}>{(players[0] !== socket.id) ? "Pick " : "Unpick "} X</button>}
+                            {(players[1] === null || players[1] === socket.id) && <button onClick={() => pickSide(2)}>{(players[1] !== socket.id) ? "Pick " : "Unpick "} O</button>}
                         </div>       
                     </div>
                     :
