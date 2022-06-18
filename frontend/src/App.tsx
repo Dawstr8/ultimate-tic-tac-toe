@@ -9,7 +9,7 @@ function App() {
   const [socket, setSocket] = useState<any>(null);
   const [room, setRoom] = useState<null | string>(null);
   const [type, setType] = useState<null | string>(null);
-  const url = "https://still-stream-09690.herokuapp.com/";
+  const url = "https://still-stream-09690.herokuapp.com";
   //const url = "http://localhost:8080"
 
 
