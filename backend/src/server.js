@@ -19,7 +19,7 @@ const port = 8080;
 const rooms = {}
 const users = {}
 
-const duelQueue = []
+let duelQueue = []
 
 app.get('/', (req, res) => {
   res.send('Hello World!')
@@ -175,6 +175,7 @@ io.on('connection', (socket) => {
   socket.on('disconnect', () => {
     leaveRoom(socket, io);
     delete users[socket.id];
+    duelQueue = duelQueue.filter((id) => (id !== socket.id));
     console.log('user disconnected');
   });
 })
