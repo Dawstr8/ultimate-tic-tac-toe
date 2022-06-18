@@ -6,25 +6,49 @@ import SmallBoard from './SmallBoard';
 
 interface Board {
     socket: any;
-    room: any;
+    room: string;
     setRoom: (value: null | string | ((prevState: null | string) => null | string)) => void;
     type: null | string;
     setType: (value: null | string | ((prevState: null | string) => null | string)) => void;
-    board: number[][];
-    setBoard: (value: number[][] | ((prevState: number[][]) => number[][])) => void;
-    bigBoard: number[];
-    setBigBoard: (value: number[] | ((prevState: number[]) => number[])) => void;
-    players: null[] | string[];
-    setPlayers: (value: null[] | string[] | ((prevState: null[] | string[]) => null[] | string[])) => void;
-    turn: number;
-    setTurn: (value: number | ((prevState: number) => number)) => void;
-    nextMoves: number[];
-    setNextMoves: (value: number[] | ((prevState: number[]) => number[])) => void;
-    winner: number;
-    setWinner: (value: number | ((prevState: number) => number)) => void;
 }
 
-export default function Board({ socket, room, setRoom, type, setType, board, setBoard, bigBoard, setBigBoard, players, setPlayers, turn, setTurn, nextMoves, setNextMoves, winner, setWinner }: Board) {
+export default function Board({ socket, room, setRoom, type, setType }: Board) {
+
+    const [board, setBoard] = useState<number[][]>(
+        [[0, 0, 0, 0, 0, 0, 0, 0, 0],
+         [0, 0, 0, 0, 0, 0, 0, 0, 0],
+         [0, 0, 0, 0, 0, 0, 0, 0, 0],
+         [0, 0, 0, 0, 0, 0, 0, 0, 0],
+         [0, 0, 0, 0, 0, 0, 0, 0, 0],
+         [0, 0, 0, 0, 0, 0, 0, 0, 0],
+         [0, 0, 0, 0, 0, 0, 0, 0, 0],
+         [0, 0, 0, 0, 0, 0, 0, 0, 0],
+         [0, 0, 0, 0, 0, 0, 0, 0, 0]]);
+    
+     const [bigBoard, setBigBoard] = useState<number[]>([0, 0, 0, 0, 0, 0, 0, 0, 0])
+     const [players, setPlayers] = useState<null[] | string[]>([null, null])
+    
+     const [nextMoves, setNextMoves] = useState<number[]>([]);
+     const [turn, setTurn] = useState<number>(1);
+     const [winner, setWinner] = useState<number>(0);
+     const [gameRunning, setGameRunning] = useState<boolean>(false);
+
+    function getRoomInfo(roomId: string): void {
+        console.log("trying to get game info")
+        axios.get('http://localhost:8080/getRoomInfo', { params: { roomId: roomId } })
+        .then((response) => {
+            setPlayers(response.data.players);
+            const game = response.data.game;
+            if (game !== null) {
+                setGameRunning(true);
+                setBoard(game.board)
+                setBigBoard(game.bigBoard)
+                setNextMoves(game.nextMoves)
+                setTurn(game.turn)
+                setWinner(game.winner)
+            }
+        });
+    }
 
     function whatColor(id: number): string {
         if (nextMoves.includes(id)) {
@@ -39,7 +63,8 @@ export default function Board({ socket, room, setRoom, type, setType, board, set
     }
 
     function startGame(): void {
-        socket.emit("start game", room)
+        socket.emit("start game", room);
+        setGameRunning(true);
     }
 
     function makeMove(bb: number, sb: number): void {
@@ -99,6 +124,15 @@ export default function Board({ socket, room, setRoom, type, setType, board, set
 
     useEffect(() => {
         if (socket !== null) {
+            socket.on("room found", (...args: any) => {
+                setRoom(args[0]);
+                setType("random");
+            });
+        }
+    }, [socket, setRoom, setPlayers, setBoard, setBigBoard, setNextMoves, setTurn, setWinner, setType]);
+
+    useEffect(() => {
+        if (socket !== null) {
             socket.on("game state changed", (...args: any) => {
                 setBoard(args[0].board)
                 setBigBoard(args[0].bigBoard)
@@ -117,17 +151,23 @@ export default function Board({ socket, room, setRoom, type, setType, board, set
         }
     }, [socket, setPlayers]);
 
+    useEffect(() => {
+        if (room !== null) {
+            getRoomInfo(room);
+        }
+    }, [room])
+
     return (
-        <div className='board'>
+        <div className='board-container'>
+        {type === "normal" && <div>Room: {room}</div>}
         {room === "waiting" ?
             <div>Waiting for oponent</div>
             :
             <div className='board'>
-                <div>
-                    {type === "normal" ?
-                        <div>X:{players[0]} {(players[0] === socket.id) && "(you)"} O:{players[1]} {(players[1] === socket.id) && "(you)"}</div>
+                    {type === "random" ? 
+                        <div>{(players[turn-1] === socket.id) ? "Your" : "Opponent's"} turn</div> 
                         :
-                        <div>{(players[turn-1] === socket.id) ? "Your" : "Opponent's"} turn</div>
+                        <div>{(players[0] === null || players[1] === null) ? <div>You can only {(gameRunning && winner === 0) ? "make move" : "start game"} if both spots are picked</div> : <div>{(players[turn-1] === socket.id && gameRunning && winner === 0) && "Your turn"}</div>}</div>
                     }
                     {board.map((smallBoard, bb) => {
                         if (bigBoard[bb] === 0 || bigBoard[bb] === -1) {
@@ -144,7 +184,6 @@ export default function Board({ socket, room, setRoom, type, setType, board, set
                             )
                         }
                     })}
-                </div>
                 {(winner !== 0) &&
                     <div>
                     {winner === -1 ?
@@ -159,12 +198,12 @@ export default function Board({ socket, room, setRoom, type, setType, board, set
                 <button onClick={() => leaveRoom()}>Leave room</button>
                 {type === "normal" ?
                     <div>
-                        <button onClick={() => startGame()}>Start game</button>
-                        <button onClick={() => randomMove()}>Random Move</button>
+                        {(gameRunning && winner === 0 && players[turn-1] === socket.id &&  players[0] !== null && players[1] !== null) && <button onClick={() => randomMove()}>Random Move</button>}
                         <div>
                             {(players[0] === null || players[0] === socket.id) && <button onClick={() => pickSide(1)}>{(players[0] !== socket.id) ? "Pick " : "Unpick "} X</button>}
                             {(players[1] === null || players[1] === socket.id) && <button onClick={() => pickSide(2)}>{(players[1] !== socket.id) ? "Pick " : "Unpick "} O</button>}
                         </div>       
+                        {((!gameRunning || winner !== 0) && players[0] !== null && players[1] !== null) && <button onClick={() => startGame()}>Start game</button>}
                     </div>
                     :
                     <div>

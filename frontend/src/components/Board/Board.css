@@ -1,8 +1,13 @@
-.board {
+.board-container {
     position: relative;
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
+    display: inline-block;
+}
+
+.board {
+    position: relative;
     display: inline-block;
     height: 39.6vw;
     width: 39.6vw;

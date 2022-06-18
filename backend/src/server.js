@@ -52,31 +52,16 @@ app.get('/makeMove', (req, res) => {
     });
 })
 
-app.get('/getGameInfo', (req, res) => {
-  const roomId = req.query.roomId;
-  if (roomId in rooms) {
-    const room = rooms[roomId];
-    if (room.game !== null) {
-      res.send({
-        board: room.game.board,
-        bigBoard: room.game.bigBoard,
-        nextMoves: room.game.nextMoves,
-        turn: room.game.turn,
-        winner: room.game.winner,
-      })
-    }
-  }
-})
-
-app.get('/getPlayersInfo', (req, res) => {
+app.get('/getRoomInfo', (req, res) => {
   const roomId = req.query.roomId;
   if (roomId in rooms) {
     const room = rooms[roomId];
     res.send({
-      players: room.players
+      players: room.players,
+      game: room.game
     })
   }
-})
+});
 
 app.get('/getRoomsList', (req, res) => {
   res.send(getRoomsList())
@@ -109,7 +94,7 @@ io.on('connection', (socket) => {
         rooms[roomId] = new Room(roomId, type, socket.id, player2);
           
         for (let i = 0; i < rooms[roomId].users.length; i++) {
-          io.to(rooms[roomId].users[i]).emit('room found', roomId, rooms[roomId].players, rooms[roomId].game);
+          io.to(rooms[roomId].users[i]).emit('room found', roomId);
         }
       }
     }

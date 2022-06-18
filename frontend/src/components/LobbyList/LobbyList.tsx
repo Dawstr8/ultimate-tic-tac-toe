@@ -7,11 +7,9 @@ interface LobbyList {
     socket: any;
     setRoom: (value: null | string | ((prevState: null | string) => null | string)) => void;
     setType: (value: null | string | ((prevState: null | string) => null | string)) => void;
-    getGameInfo: (roomId: string) => void;
-    getPlayersInfo: (roomId: string) => void;
 }
 
-export default function LobbyList({ socket, setRoom, setType, getGameInfo, getPlayersInfo } : LobbyList) {
+export default function LobbyList({ socket, setRoom, setType } : LobbyList) {
 
     const [lobbyList, setLobbyList] = useState<Array<ILobbyItem>>([])
 
@@ -22,8 +20,6 @@ export default function LobbyList({ socket, setRoom, setType, getGameInfo, getPl
                     setType("normal");
                 }
                 setRoom(response);
-                getPlayersInfo(response);
-                getGameInfo(response);
             });
         }
     }
@@ -64,7 +60,7 @@ export default function LobbyList({ socket, setRoom, setType, getGameInfo, getPl
                 {lobbyList.map((elem) => {
                     return (
                     <div className='lobby-item'>
-                        <div className='lobby-item-text'>{elem.id} {elem.player1} {elem.player2}</div>
+                        <div className='lobby-item-text'>{elem.id}</div>
                         <button onClick={() => joinRoom(elem.id)}>Join room</button>
                     </div>
                     )

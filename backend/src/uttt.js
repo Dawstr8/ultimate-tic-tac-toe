@@ -67,10 +67,6 @@ module.exports = class UltimateTicTacToe {
             this.lastMove = [bb, sb]
             this.nextMoves = this.calculateNextMoves()
             this.turn = (this.turn % 2) + 1;
-            if (this.winner === -1) {
-                console.log(this.bigBoard);
-                console.log(this.board)
-            }
             return true;
         }
         return false;
