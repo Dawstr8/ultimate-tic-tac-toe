@@ -21,7 +21,7 @@ function App() {
   }, [setSocket]);
 
   return (
-    <div className="bg">
+    <div>
       {(room === null)?
         <LobbyList
           setRoom={setRoom}
