@@ -14,7 +14,7 @@ var User = require('./user.js')
 var Room = require('./room.js')
 
 let game = null;
-const port = 8080;
+const port = process.env.PORT || 8080;
 
 const rooms = {}
 const users = {}

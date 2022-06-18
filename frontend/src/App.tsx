@@ -1,4 +1,3 @@
-import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
 import './App.css';
@@ -10,9 +9,12 @@ function App() {
   const [socket, setSocket] = useState<any>(null);
   const [room, setRoom] = useState<null | string>(null);
   const [type, setType] = useState<null | string>(null);
+  const url = "https://still-stream-09690.herokuapp.com/";
+  //const url = "http://localhost:8080"
+
 
   useEffect(() => {
-    const newSocket = io(`http://localhost:8080`, { transports: ['websocket'] });
+    const newSocket = io(url, { transports: ['websocket'] });
 
     setSocket(newSocket);
     return () => { newSocket.disconnect() };
@@ -21,12 +23,17 @@ function App() {
   return (
     <div className="bg">
       {(room === null)?
-        <LobbyList setRoom={setRoom} setType={setType} socket={socket}/>
+        <LobbyList
+          setRoom={setRoom}
+          setType={setType}
+          socket={socket}
+          url={url}/>
         :
         <Board
           room={room} setRoom={setRoom} 
           type={type} setType={setType}
           socket={socket}
+          url={url}
           />
       }      
     </div>

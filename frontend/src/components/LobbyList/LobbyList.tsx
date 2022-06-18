@@ -7,9 +7,10 @@ interface LobbyList {
     socket: any;
     setRoom: (value: null | string | ((prevState: null | string) => null | string)) => void;
     setType: (value: null | string | ((prevState: null | string) => null | string)) => void;
+    url: string;
 }
 
-export default function LobbyList({ socket, setRoom, setType } : LobbyList) {
+export default function LobbyList({ socket, setRoom, setType, url } : LobbyList) {
 
     const [lobbyList, setLobbyList] = useState<Array<ILobbyItem>>([])
 
@@ -37,7 +38,7 @@ export default function LobbyList({ socket, setRoom, setType } : LobbyList) {
 
     useEffect(() => {
         function getRoomsList(): void {
-            axios.get('http://localhost:8080/getRoomsList')
+            axios.get(url + '/getRoomsList')
             .then((response) => {
                 setLobbyList(response.data)
             });

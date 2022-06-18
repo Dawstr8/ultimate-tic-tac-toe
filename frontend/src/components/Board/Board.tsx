@@ -10,9 +10,10 @@ interface Board {
     setRoom: (value: null | string | ((prevState: null | string) => null | string)) => void;
     type: null | string;
     setType: (value: null | string | ((prevState: null | string) => null | string)) => void;
+    url: string;
 }
 
-export default function Board({ socket, room, setRoom, type, setType }: Board) {
+export default function Board({ socket, room, setRoom, type, setType, url }: Board) {
 
     const [board, setBoard] = useState<number[][]>(
         [[0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -35,7 +36,7 @@ export default function Board({ socket, room, setRoom, type, setType }: Board) {
 
     function getRoomInfo(roomId: string): void {
         console.log("trying to get game info")
-        axios.get('http://localhost:8080/getRoomInfo', { params: { roomId: roomId } })
+        axios.get(url + '/getRoomInfo', { params: { roomId: roomId } })
         .then((response) => {
             setPlayers(response.data.players);
             const game = response.data.game;
